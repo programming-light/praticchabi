@@ -6,6 +6,7 @@ import { publicUrl } from '@/lib/storage'
 import { settings } from '@/lib/settings'
 import { Notice, PostImage, SectionHead, StoryCard } from '@/components/ui'
 import FeaturedCarousel, { type FeaturedSlide } from '@/components/FeaturedCarousel'
+import AuthorCarousel, { type AuthorSlide } from '@/components/AuthorCarousel'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
 const one = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value)
@@ -64,6 +65,15 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
     date: formatDate(post.publishedAt || post.createdAt),
     image: publicUrl(post.coverUrl) || '/images/logo-inline.png',
     hasCover: Boolean(publicUrl(post.coverUrl)),
+  }))
+
+  const authorSlides: AuthorSlide[] = topAuthors.map((author) => ({
+    id: author.id,
+    href: `/author/${author.id}`,
+    name: author.name,
+    image: publicUrl(author.avatarUrl) || '',
+    bio: author.bio || '',
+    postsLabel: `${bn(author._count.posts)}টি লেখা`,
   }))
 
   return (
@@ -156,7 +166,7 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
         <div className="pcx-layout">
           <div className="pcx-layout__main">
             {latest.length ? (
-              <div className="pcx-grid">
+              <div className="pcx-grid pcx-grid--latest">
                 {latest.map((post) => <StoryCard post={post} key={post.id} />)}
               </div>
             ) : <div className="pc-empty">এখনো কোনো লেখা প্রকাশিত হয়নি।</div>}
@@ -172,7 +182,7 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
               {latestIssue.coverUrl && (
                 <img src={publicUrl(latestIssue.coverUrl)} alt={latestIssue.title} loading="lazy" />
               )}
-              <span className="pcx-issue__badge">সর্বশেষ সংখ্যা</span>
+              <span className="pcx-issue__badge">{latestIssue.isCurrent ? 'বর্তমান সংখ্যা' : 'সর্বশেষ সংখ্যা'}</span>
             </div>
             <div className="pcx-issue__body">
               <span className="pc-label--light">নতুন প্রকাশ</span>
@@ -268,19 +278,7 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
             </div>
             <Link className="pcx-sechead__all" href="/authors">সব লেখক <Arrow /></Link>
           </div>
-          <div className="pc-strip">
-            {topAuthors.map((author) => (
-              <Link className="pc-person" href={`/author/${author.id}`} key={author.id}>
-                <span className="pc-person__avatar">
-                  {author.avatarUrl
-                    ? <img src={publicUrl(author.avatarUrl)} alt="" loading="lazy" />
-                    : <span className="pc-noimg" />}
-                </span>
-                <h3>{author.name}</h3>
-                <span className="pc-meta">{bn(author._count.posts)}টি লেখা</span>
-              </Link>
-            ))}
-          </div>
+          <AuthorCarousel authors={authorSlides} />
         </section>
       )}
 

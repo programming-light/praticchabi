@@ -12,7 +12,7 @@ export default async function IssuesPage({ searchParams }: { searchParams: Promi
   const [total, issues] = await Promise.all([
     prisma.issue.count(),
     prisma.issue.findMany({
-      orderBy: { publishedAt: 'desc' },
+      orderBy: [{ isCurrent: 'desc' }, { publishedAt: 'desc' }],
       take: PER_PAGE,
       skip: (page - 1) * PER_PAGE,
       include: { _count: { select: { posts: { where: { status: 'PUBLISHED' } } } } },
@@ -32,7 +32,9 @@ export default async function IssuesPage({ searchParams }: { searchParams: Promi
                     {issue.coverUrl ? <img src={publicUrl(issue.coverUrl)} alt={issue.title} loading="lazy" /> : null}
                   </Link>
                   <div className="pc-issuecard__body">
-                    {page === 1 && index === 0 && <span className="pc-label">সর্বশেষ সংখ্যা</span>}
+                    {issue.isCurrent
+                      ? <span className="pc-label">বর্তমান হার্ডকপি</span>
+                      : page === 1 && index === 0 ? <span className="pc-label">সর্বশেষ সংখ্যা</span> : null}
                     <h2><Link href={`/issues/${issue.slug}`}>{issue.title}</Link></h2>
                     {issue.period && <span className="pc-meta">{issue.period}</span>}
                     {issue.price && <span className="pc-meta">মূল্য: {issue.price}</span>}

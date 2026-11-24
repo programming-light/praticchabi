@@ -48,6 +48,7 @@ model Issue {
   coverUrl    String?
   orderUrl    String?
   description String?
+  isCurrent   Boolean  @default(false)
   publishedAt DateTime @default(now())
   createdAt   DateTime @default(now())
   posts       Post[]

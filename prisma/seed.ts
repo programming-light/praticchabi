@@ -70,6 +70,7 @@ async function main() {
       price: '২০০ টাকা',
       coverUrl: '/images/logo-inline.png',
       description: 'দীর্ঘ বিরতির পর প্রতিচ্ছবির নতুন যাত্রা।',
+      isCurrent: true,
     },
     update: {},
   })

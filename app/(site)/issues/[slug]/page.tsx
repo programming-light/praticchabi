@@ -27,7 +27,7 @@ export default async function IssueDetailPage({ params }: { params: Promise<{ sl
               </div>
             )}
             <div className="pc-issue__info">
-              <span className="pc-label">{issue.period || 'নতুন সংখ্যা'}</span>
+              <span className="pc-label">{issue.isCurrent ? 'বর্তমান হার্ডকপি' : issue.period || 'নতুন সংখ্যা'}</span>
               <h2>{issue.title}</h2>
               {issue.description && <p>{issue.description}</p>}
               <p>ছাপা হার্ডকপি{issue.price ? `। মূল্য: ${issue.price}` : ''}</p>

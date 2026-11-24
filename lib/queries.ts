@@ -34,7 +34,18 @@ export async function getCategories() {
 }
 
 export async function getIssues(take = 50) {
-  return prisma.issue.findMany({ orderBy: { publishedAt: 'desc' }, take })
+  // The released issue stays first, so the public hard-copy banner never follows
+  // a newer draft that the editor has not released yet.
+  return prisma.issue.findMany({
+    orderBy: [{ isCurrent: 'desc' }, { publishedAt: 'desc' }],
+    take,
+  })
+}
+
+export async function getCurrentIssue() {
+  const released = await prisma.issue.findFirst({ where: { isCurrent: true } })
+  if (released) return released
+  return prisma.issue.findFirst({ orderBy: { publishedAt: 'desc' } })
 }
 
 export async function getPostBySlug(slug: string) {
