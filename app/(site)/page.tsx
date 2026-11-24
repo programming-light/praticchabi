@@ -25,8 +25,7 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
   ])
   const latestIssue = issues[0]
 
-  const [featuredBase, latest, popular, poetry, stories, activities, topAuthors] = await Promise.all([
-    publishedPosts({ where: { featured: true }, take: 5 }),
+  const [latest, popular, poetry, stories, activities, topAuthors] = await Promise.all([
     publishedPosts({ take: 6 }),
     publishedPosts({ take: 5, orderBy: [{ comments: { _count: 'desc' } }, { publishedAt: 'desc' }] }),
     publishedPosts({ where: { category: { slug: 'poetry' } }, take: 1 }),
@@ -39,14 +38,6 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
       take: 6,
     }),
   ])
-
-  const featured = featuredBase.filter((post) => post.coverUrl).slice(0, 5)
-  if (featured.length < 4) {
-    for (const post of [...featuredBase, ...latest]) {
-      if (featured.length >= 4) break
-      if (!featured.some((item) => item.id === post.id)) featured.push(post)
-    }
-  }
 
   const issuePosts: PublicPost[] = latestIssue
     ? await publishedPosts({ where: { issueId: latestIssue.id }, take: 5 })
@@ -62,7 +53,8 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
     })),
   )
 
-  const featuredSlides: FeaturedSlide[] = featured.map((post) => ({
+  // Hero carousel is powered by the popular posts ranking.
+  const featuredSlides: FeaturedSlide[] = popular.map((post) => ({
     id: post.id,
     slug: post.slug,
     title: post.title,
@@ -123,28 +115,26 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
             )}
           </div>
         )}
-        {popular.length > 0 && (
-          <div className="pc-wrap pcx-popular">
-            <div className="pcx-popular__head">
-              <span className="pcx-popular__eyebrow">পাঠকের পছন্দ</span>
-              <h2>জনপ্রিয় লেখা</h2>
+        {/* Circular advertisement / promotion sector (replaces the old popular card). */}
+        <div className="pc-wrap pcx-adsector">
+          <span className="pcx-adsector__label">বিজ্ঞাপন</span>
+          <div className="pcx-adsector__body">
+            <div className="pcx-adsector__copy">
+              <h2>আপনার লেখাও প্রতিচ্ছবিতে প্রকাশিত হোক</h2>
+              <p>মৌলিক বাংলা লেখা পাঠান — সম্পাদকীয় পর্যালোচনার পর প্রকাশ করা হবে।</p>
             </div>
-            <div className="pcx-popular__list">
-              {popular.map((post, index) => (
-                <Link className="pcx-popular__item" href={`/posts/${post.slug}`} key={post.id}>
-                  <span className="pcx-popular__num">{bn(index + 1)}</span>
-                  <span className="pcx-popular__thumb"><PostImage url={post.coverUrl} alt={post.title} /></span>
-                  <span className="pcx-popular__body">
-                    <b>{post.title}</b>
-                    <span className="pc-meta">{post.author.name} · {post.category?.name}</span>
-                  </span>
-                  <span className="pcx-popular__arrow" aria-hidden="true"><Arrow /></span>
-                </Link>
-              ))}
+            <div className="pcx-adsector__actions">
+              <Link className="pcx-adsector__btn" href="/submit">লেখা পাঠান <Arrow /></Link>
+              {latestIssue && (
+                <a className="pcx-adsector__link" href={issueOrderUrl(latestIssue)} target="_blank" rel="noopener">
+                  হার্ডকপি অর্ডার করুন
+                </a>
+              )}
             </div>
           </div>
-        )}
+        </div>
         <div className="pc-wrap pcx-catbar">
+          <span className="pcx-catbar__label">বিভাগ</span>
           {categories.slice(0, 8).map((category) => (
             <Link href={`/category/${category.slug}`} key={category.id}>{category.name}</Link>
           ))}
@@ -171,22 +161,6 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
               </div>
             ) : <div className="pc-empty">এখনো কোনো লেখা প্রকাশিত হয়নি।</div>}
           </div>
-          <aside className="pcx-layout__side">
-            <div className="pcx-panel">
-              <div className="pcx-panel__head"><h3>বিভাগ</h3></div>
-              <div className="pcx-tags">
-                {categories.map((category) => (
-                  <Link href={`/category/${category.slug}`} key={category.id}>{category.name}</Link>
-                ))}
-              </div>
-            </div>
-            <div className="pcx-submitcard">
-              <span className="pcx-submitcard__icon" aria-hidden="true">✎</span>
-              <h3>আপনার লেখা পাঠান</h3>
-              <p>মৌলিক বাংলা লেখা, .docx ফরম্যাটে, ১৫০০-৩০০০ শব্দের মধ্যে।</p>
-              <Link className="pc-btn pc-btn--white" href="/submit">লেখা জমা দিন</Link>
-            </div>
-          </aside>
         </div>
       </section>
 

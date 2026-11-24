@@ -48,7 +48,7 @@ export default function FeaturedCarousel({ slides }: { slides: FeaturedSlide[] }
     <section
       className={`pcx-carousel${paused ? ' is-paused' : ''}`}
       aria-roledescription="carousel"
-      aria-label="নির্বাচিত লেখা"
+      aria-label="জনপ্রিয় লেখা"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
@@ -60,6 +60,7 @@ export default function FeaturedCarousel({ slides }: { slides: FeaturedSlide[] }
         if (event.key === 'ArrowRight') { event.preventDefault(); go(active + 1) }
       }}
     >
+      <span className="pcx-carousel__label">জনপ্রিয় লেখা</span>
       <div className="pcx-carousel__track">
         {slides.map((slide, index) => (
           <div
