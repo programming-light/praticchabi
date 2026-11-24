@@ -1,0 +1,151 @@
+/* Additions on top of the original WordPress theme stylesheet. */
+
+/* --- shared utilities --------------------------------------------------- */
+.pc-page { padding-top: 40px; padding-bottom: 72px; min-height: 50vh; }
+.pc-empty { padding: 34px; border: 1px dashed var(--pc-border); border-radius: 8px; background: #fff; color: var(--pc-mute); }
+.pc-btn--small { padding: 7px 16px; font-size: 14px; }
+.pc-btn--danger { background: #8a1c14; border-color: #8a1c14; }
+.pc-btn--danger:hover { background: #6d1410; border-color: #6d1410; }
+.pc-inline { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pc-center { text-align: center; }
+.pc-label--light { color: #9be0a4; }
+.pc-muted { color: var(--pc-mute); }
+.pc-mt { margin-top: 24px; }
+.pc-mb { margin-bottom: 24px; }
+.pc-divider { border: 0; border-top: 1px solid var(--pc-border); margin: 28px 0; }
+.pc-form-hint { font-size: 14px; color: var(--pc-mute); }
+.pc-file-name { display: block; font-size: 14px; color: var(--pc-mute); margin-top: 4px; }
+.pc-form select[multiple] { min-height: 140px; }
+.pc-form input[type=checkbox] { width: auto; }
+.pc-honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+body.pc .pc-form .pc-field-error { color: #8a1c14; font-size: 14px; font-weight: 600; }
+
+/* --- pagination --------------------------------------------------------- */
+.pc-pagination { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.pc-pagination a, .pc-pagination span {
+  display: inline-block; padding: 8px 16px; border: 2px solid var(--pc-green);
+  border-radius: 6px; font-weight: 600; color: var(--pc-green);
+}
+.pc-pagination span { background: var(--pc-green); color: #fff; }
+.pc-pagination a:hover { background: var(--pc-tint); }
+.pc-pagination .pc-pagination__dots { border: 0; background: transparent; padding: 4px; }
+
+/* --- comments ----------------------------------------------------------- */
+.pc-comments h2 { font-size: 22px; margin-bottom: 16px; }
+.pc-comments li strong { color: var(--pc-green); }
+.pc-comments li p { margin: 4px 0; }
+.pc-comments textarea { min-height: 110px; resize: vertical; }
+.pc-login-note { background: var(--pc-tint2); border-radius: 6px; padding: 14px 18px; color: var(--pc-text); }
+
+/* --- account ------------------------------------------------------------ */
+.pc-account__list li { align-items: center; }
+.pc-account__list a { font-weight: 600; }
+.pc-status--reviewing { background: #e5efff; color: #1f4f8a; }
+.pc-status--accepted { background: #d9f0dc; color: #0c4a2c; }
+
+/* --- admin shell -------------------------------------------------------- */
+body.pc:has(.admin-shell), body.admin-body { margin: 0; background: #f5f7f3; color: var(--pc-ink); font-family: var(--pc-sans); }
+/* Scope the green link colour to page content only — a blanket `!important` rule
+   here used to override every sidebar colour edit, which is why changes didn't apply. */
+body.pc:has(.admin-shell) .admin-main a { color: #0cbb66 !important; }
+.admin-shell { display: flex; min-height: 100vh; }
+.admin-sidebar {
+  position: fixed; top: 0; left: 0; bottom: 0; z-index: 20;
+  width: 248px; background: var(--pc-dark); color: #d7e8da;
+  display: flex; flex-direction: column; padding: 22px 14px; height: 100vh; overflow-y: auto;
+}
+.admin-sidebar__brand { font-family: var(--pc-serif); font-size: 24px; color: #fff; padding: 0 12px 6px; }
+.admin-sidebar__sub { font-size: 12px; padding: 0 12px 22px; color: #9fc2aa; }
+.admin-sidebar a {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  color: #0cbb66; padding: 10px 12px; border-radius: 6px; font-size: 15px; margin-bottom: 2px;
+  font-weight: 500;
+}
+.admin-sidebar a:hover { background: rgba(12,187,102,.14); color: #5ce6a3; }
+.admin-sidebar a.is-active { background: var(--pc-green); color: #fff; font-weight: 600; }
+.admin-sidebar__count { background: #fff3cd; color: #7a5b00; border-radius: 999px; padding: 0 9px; font-size: 12px; font-weight: 700; }
+.admin-sidebar__group { font-size: 12px; color: #7fa88b; padding: 18px 12px 6px; text-transform: uppercase; letter-spacing: .05em; }
+.admin-sidebar__foot { margin-top: auto; padding: 16px 12px 0; border-top: 1px solid rgba(255,255,255,.15); font-size: 13px; }
+.admin-sidebar__foot a { padding: 4px 0; }
+.admin-main { flex: 1 1 auto; min-width: 0; margin-left: 248px; }
+.admin-topbar {
+  background: #fff; border-bottom: 1px solid var(--pc-border); padding: 16px 30px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+}
+.admin-topbar h1 { font-family: var(--pc-serif); font-size: 22px; }
+.admin-topbar__user { font-size: 14px; color: var(--pc-mute); display: flex; align-items: center; gap: 12px; }
+.admin-content { padding: 28px 30px 64px; max-width: 1400px; }
+.admin-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr)); gap: 16px; }
+.admin-card { background: #fff; border: 1px solid var(--pc-border); border-radius: 10px; padding: 22px; }
+.admin-card h2, .admin-card h3 { font-family: var(--pc-serif); font-size: 18px; margin: 0 0 12px; }
+.admin-card--link { display: block; color: var(--pc-ink); transition: border-color .15s, transform .15s; }
+.admin-card--link:hover { border-color: var(--pc-mid); transform: translateY(-2px); color: var(--pc-ink); }
+.admin-card__num { font-family: var(--pc-serif); font-size: 34px; font-weight: 700; color: var(--pc-green); line-height: 1.2; }
+.admin-card__label { font-size: 14px; color: var(--pc-mute); }
+.admin-card.is-hot { border-color: #e0b400; background: #fffdf3; }
+.admin-grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(380px, 100%), 1fr)); gap: 20px; margin-top: 22px; }
+.admin-panel { background: #fff; border: 1px solid var(--pc-border); border-radius: 10px; padding: 22px; margin-bottom: 22px; }
+.admin-panel > h2 { font-family: var(--pc-serif); font-size: 20px; margin: 0 0 16px; }
+.admin-toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.admin-toolbar form { display: flex; flex-wrap: wrap; gap: 8px; }
+.admin-toolbar input, .admin-toolbar select {
+  font: inherit; font-size: 14px; padding: 8px 12px; border: 2px solid var(--pc-border); border-radius: 6px; background: #fff;
+}
+.admin-table-wrap { overflow-x: auto; }
+.admin-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.admin-table th, .admin-table td { text-align: left; padding: 11px 12px; border-bottom: 1px solid #e6ebe3; vertical-align: top; }
+.admin-table th { color: var(--pc-mute); font-size: 13px; font-weight: 600; background: #f8faf6; }
+.admin-table tbody tr:hover { background: #f6faf3; }
+.admin-table a { font-weight: 600; }
+.admin-table .num { font-family: var(--pc-serif); font-size: 16px; }
+.admin-table .warn { color: #b3261e; font-weight: 700; }
+.admin-badge { display: inline-block; font-size: 12px; font-weight: 700; border-radius: 999px; padding: 3px 11px; background: var(--pc-tint); color: var(--pc-green); white-space: nowrap; }
+.admin-badge--NEW { background: #fff3cd; color: #7a5b00; }
+.admin-badge--REVIEWING { background: #e5efff; color: #1f4f8a; }
+.admin-badge--ACCEPTED { background: #d9f0dc; color: #0c4a2c; }
+.admin-badge--REJECTED { background: #fde4e1; color: #8a1c14; }
+.admin-badge--PUBLISHED { background: var(--pc-green); color: #fff; }
+.admin-badge--true { background: #d9f0dc; color: #0c4a2c; }
+.admin-badge--false { background: #eee; color: #666; }
+.admin-form { display: grid; gap: 16px; max-width: 760px; }
+.admin-form label { display: flex; flex-direction: column; gap: 6px; font-size: 15px; font-weight: 600; }
+.admin-form input[type=text], .admin-form input[type=email], .admin-form input[type=password],
+.admin-form input[type=number], .admin-form input[type=url], .admin-form input[type=file],
+.admin-form select, .admin-form textarea {
+  width: 100%; font: inherit; font-size: 15px; padding: 10px 12px; border: 2px solid #6b7d72; border-radius: 6px; background: #fff;
+}
+.admin-form textarea { min-height: 130px; resize: vertical; }
+.admin-form input[type=checkbox] { width: 20px; height: 20px; }
+.admin-form label.check { flex-direction: row; align-items: center; gap: 10px; font-weight: 500; }
+.admin-form__row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 16px; }
+.admin-form__actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.admin-form small { color: var(--pc-mute); font-weight: 400; }
+.admin-note { border-left: 4px solid var(--pc-mid); background: var(--pc-tint2); padding: 12px 16px; border-radius: 4px; font-size: 14px; }
+.admin-notice { padding: 12px 16px; border-radius: 6px; margin-bottom: 18px; font-weight: 600; }
+.admin-notice--ok { background: #d9f0dc; color: #0c4a2c; }
+.admin-notice--err { background: #fde4e1; color: #8a1c14; }
+.admin-dl { display: grid; grid-template-columns: 150px 1fr; gap: 8px 14px; font-size: 15px; }
+.admin-dl dt { color: var(--pc-mute); }
+.admin-dl dd { margin: 0; overflow-wrap: anywhere; }
+.admin-thumb { width: 64px; height: 48px; object-fit: cover; border-radius: 4px; background: var(--pc-tint); }
+.admin-inline-form { display: inline; }
+.admin-btn-link {
+  display: inline-block; background: var(--pc-green); color: #fff; font: inherit; font-size: 14px; font-weight: 600;
+  padding: 7px 16px; border-radius: 999px; border: 2px solid var(--pc-green); cursor: pointer;
+}
+.admin-btn-link:hover { background: var(--pc-dark); color: #fff; }
+.admin-btn-link--ghost { background: transparent; color: var(--pc-green); }
+.admin-btn-link--ghost:hover { background: var(--pc-green); color: #fff; }
+.admin-btn-link--danger { background: transparent; border-color: #b3261e; color: #8a1c14; }
+.admin-btn-link--danger:hover { background: #8a1c14; color: #fff; }
+.admin-empty { padding: 26px; text-align: center; color: var(--pc-mute); border: 1px dashed var(--pc-border); border-radius: 8px; }
+.admin-preview { max-width: 320px; border: 1px solid var(--pc-border); border-radius: 8px; }
+
+@media (max-width: 900px) {
+  .admin-sidebar { position: static; width: 100%; height: auto; }
+  .admin-sidebar nav { display: flex; flex-wrap: wrap; gap: 4px; }
+  .admin-sidebar a { margin: 0; }
+  .admin-sidebar__group, .admin-sidebar__sub, .admin-sidebar__foot { display: none; }
+  .admin-main { margin-left: 0; }
+  .admin-content, .admin-topbar { padding-left: 16px; padding-right: 16px; }
+}

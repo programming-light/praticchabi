@@ -1,0 +1,38 @@
+{
+  "name": "praticchabi-next",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "prisma generate --schema prisma/schema.prisma && prisma generate --schema prisma/schema.postgresql.prisma && next build",
+    "start": "next start -p 3000",
+    "typecheck": "tsc --noEmit",
+    "postinstall": "prisma generate --schema prisma/schema.prisma && prisma generate --schema prisma/schema.postgresql.prisma",
+    "db:push": "prisma db push --schema prisma/schema.prisma",
+    "db:push:pg": "prisma db push --schema prisma/schema.postgresql.prisma",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:studio": "prisma studio --schema prisma/schema.prisma"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1000.0",
+    "@prisma/client": "6.19.3",
+    "@vercel/blob": "^2.9.0",
+    "bcryptjs": "^3.0.3",
+    "jose": "^6.2.18",
+    "jszip": "^3.10.2",
+    "next": "16.4.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "prisma": "6.19.3",
+    "tsx": "^4.20.0",
+    "typescript": "^5.8.0"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  }
+}

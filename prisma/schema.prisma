@@ -1,0 +1,175 @@
+// Local development schema (SQLite). Production uses schema.postgresql.prisma.
+// Keep both files identical except for the generator output and datasource provider.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma-sqlite"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String         @id @default(cuid())
+  email        String         @unique
+  name         String
+  passwordHash String
+  role         String         @default("READER")
+  avatarUrl    String?
+  bio          String?
+  resetToken   String?        @unique
+  resetExpires DateTime?
+  createdAt    DateTime       @default(now())
+  submissions  Submission[]
+  posts        Post[]
+  comments     Comment[]
+  saved        SavedArticle[]
+}
+
+model Category {
+  id          String       @id @default(cuid())
+  slug        String       @unique
+  name        String
+  description String?
+  sortOrder   Int          @default(0)
+  posts       Post[]
+  submissions Submission[]
+}
+
+model Issue {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  period      String?
+  price       String?
+  coverUrl    String?
+  orderUrl    String?
+  description String?
+  publishedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  posts       Post[]
+}
+
+model Post {
+  id          String         @id @default(cuid())
+  slug        String         @unique
+  title       String
+  byline      String?
+  excerpt     String?
+  content     String
+  coverUrl    String?
+  authorId    String
+  categoryId  String?
+  issueId     String?
+  featured    Boolean        @default(false)
+  status      String         @default("PUBLISHED")
+  views       Int            @default(0)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  publishedAt DateTime?
+  author      User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  category    Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  issue       Issue?         @relation(fields: [issueId], references: [id], onDelete: SetNull)
+  comments    Comment[]
+  saved       SavedArticle[]
+
+  @@index([categoryId])
+  @@index([issueId])
+  @@index([publishedAt])
+  @@index([status])
+}
+
+model Submission {
+  id           String    @id @default(cuid())
+  title        String
+  name         String
+  email        String
+  phone        String?
+  note         String?
+  categoryId   String?
+  fileKey      String
+  originalName String
+  words        Int       @default(0)
+  status       String    @default("NEW")
+  editorNote   String?
+  userId       String?
+  postId       String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  category     Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  user         User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([email])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  body      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([isRead])
+}
+
+model Subscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model Activity {
+  id        String   @id @default(cuid())
+  caption   String
+  imageUrl  String?
+  dateLabel String?
+  createdAt DateTime @default(now())
+}
+
+model SavedArticle {
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([userId, postId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  body      String
+  approved  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+}
+
+model RateLimit {
+  key         String   @id
+  count       Int      @default(0)
+  windowStart DateTime @default(now())
+}
+
+model EmailLog {
+  id        String   @id @default(cuid())
+  toAddress String
+  subject   String
+  body      String
+  provider  String
+  createdAt DateTime @default(now())
+}
+
+model Setting {
+  key   String @id
+  value String
+}
