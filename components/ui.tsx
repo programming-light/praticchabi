@@ -32,8 +32,9 @@ export function SectionHead({ title, href, linkText }: { title: string; href?: s
 }
 
 export function PostImage({ url, alt }: { url?: string | null; alt: string }) {
-  if (!url) return <span className="pc-noimg" />
-  return <img src={publicUrl(url)} alt={alt} loading="lazy" />
+  // Every post thumbnail falls back to the Protichobi wordmark when no cover is set.
+  const src = publicUrl(url) || '/images/logo-left.png'
+  return <img src={src} alt={alt} loading="lazy" />
 }
 
 export function PostCard({ post }: { post: PublicPost }) {

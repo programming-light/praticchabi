@@ -123,6 +123,27 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
             )}
           </div>
         )}
+        {popular.length > 0 && (
+          <div className="pc-wrap pcx-popular">
+            <div className="pcx-popular__head">
+              <span className="pcx-popular__eyebrow">পাঠকের পছন্দ</span>
+              <h2>জনপ্রিয় লেখা</h2>
+            </div>
+            <div className="pcx-popular__list">
+              {popular.map((post, index) => (
+                <Link className="pcx-popular__item" href={`/posts/${post.slug}`} key={post.id}>
+                  <span className="pcx-popular__num">{bn(index + 1)}</span>
+                  <span className="pcx-popular__thumb"><PostImage url={post.coverUrl} alt={post.title} /></span>
+                  <span className="pcx-popular__body">
+                    <b>{post.title}</b>
+                    <span className="pc-meta">{post.author.name} · {post.category?.name}</span>
+                  </span>
+                  <span className="pcx-popular__arrow" aria-hidden="true"><Arrow /></span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="pc-wrap pcx-catbar">
           {categories.slice(0, 8).map((category) => (
             <Link href={`/category/${category.slug}`} key={category.id}>{category.name}</Link>
@@ -151,18 +172,6 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
             ) : <div className="pc-empty">এখনো কোনো লেখা প্রকাশিত হয়নি।</div>}
           </div>
           <aside className="pcx-layout__side">
-            <div className="pcx-panel">
-              <div className="pcx-panel__head"><h3>জনপ্রিয় লেখা</h3></div>
-              {popular.map((post, index) => (
-                <Link className="pcx-rank" href={`/posts/${post.slug}`} key={post.id}>
-                  <span className="pcx-rank__num">{bn(index + 1)}</span>
-                  <span className="pcx-rank__body">
-                    <b>{post.title}</b>
-                    <span className="pc-meta">{post.author.name}</span>
-                  </span>
-                </Link>
-              ))}
-            </div>
             <div className="pcx-panel">
               <div className="pcx-panel__head"><h3>বিভাগ</h3></div>
               <div className="pcx-tags">

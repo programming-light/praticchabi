@@ -73,7 +73,7 @@ body.pc .pc-dd ul a { color: var(--pc-ink); padding: 8px 18px; font-size: 15px; 
 body.pc .pc-dd ul a:hover { background: var(--pc-tint2); color: var(--pc-green); }
 .pc-nav__auth { display: flex; align-items: center; gap: 18px; padding: 8px 0; }
 body.pc .pc-nav__auth a { padding: 0; font-size: 15px; }
-body.pc .pc-nav__auth a.pc-pill { background: #fff; color: var(--pc-green); padding: 8px 20px; border-radius: 999px; font-weight: 600; }
+body.pc .pc-nav__auth a.pc-pill { background: #fff; color: var(--pc-green); padding: 5px 10px; border-radius: 999px; font-weight: 600; }
 body.pc .pc-nav__auth a.pc-pill:hover { background: var(--pc-tint); color: var(--pc-green); }
 
 /* Page head */
