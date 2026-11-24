@@ -1,21 +1,32 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/db'
 import { bn, formatDate, issueOrderUrl, SITE, excerpt } from '@/lib/config'
-import { getCategories, getIssues, postInclude, publishedPosts, type PublicPost } from '@/lib/queries'
+import { getCategories, getIssues, publishedPosts, type PublicPost } from '@/lib/queries'
 import { publicUrl } from '@/lib/storage'
-import { Notice, PostCard, PostImage, PostRow, SectionHead } from '@/components/ui'
+import { settings } from '@/lib/settings'
+import { Notice, PostImage, SectionHead, StoryCard } from '@/components/ui'
+import FeaturedCarousel, { type FeaturedSlide } from '@/components/FeaturedCarousel'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
 const one = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value)
 
+const Arrow = () => (
+  <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M5 12h14m-6-6 6 6-6 6" />
+  </svg>
+)
+
 export default async function HomePage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams
-  const categories = await getCategories()
-  const issues = await getIssues(1)
+  const [categories, issues, config] = await Promise.all([
+    getCategories(),
+    getIssues(1),
+    settings(),
+  ])
   const latestIssue = issues[0]
 
   const [featuredBase, latest, popular, poetry, stories, activities, topAuthors] = await Promise.all([
-    publishedPosts({ where: { featured: true, coverUrl: { not: null } }, take: 5 }),
+    publishedPosts({ where: { featured: true }, take: 5 }),
     publishedPosts({ take: 6 }),
     publishedPosts({ take: 5, orderBy: [{ comments: { _count: 'desc' } }, { publishedAt: 'desc' }] }),
     publishedPosts({ where: { category: { slug: 'poetry' } }, take: 1 }),
@@ -29,10 +40,13 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
     }),
   ])
 
-  const essayCategory = categories.find((category) => category.slug === 'essay')
-  const featured = featuredBase.length
-    ? featuredBase
-    : await publishedPosts({ where: { category: { slug: 'essay' }, coverUrl: { not: null } }, take: 5 })
+  const featured = featuredBase.filter((post) => post.coverUrl).slice(0, 5)
+  if (featured.length < 4) {
+    for (const post of [...featuredBase, ...latest]) {
+      if (featured.length >= 4) break
+      if (!featured.some((item) => item.id === post.id)) featured.push(post)
+    }
+  }
 
   const issuePosts: PublicPost[] = latestIssue
     ? await publishedPosts({ where: { issueId: latestIssue.id }, take: 5 })
@@ -48,95 +62,146 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
     })),
   )
 
-  const [bigFeature, ...restFeatures] = featured
-  const sideColumns: PublicPost[][] = []
-  for (let i = 0; i < restFeatures.length; i += 2) sideColumns.push(restFeatures.slice(i, i + 2))
+  const featuredSlides: FeaturedSlide[] = featured.map((post) => ({
+    id: post.id,
+    slug: post.slug,
+    title: post.title,
+    excerpt: excerpt(post.content, 26),
+    category: post.category?.name || 'প্রবন্ধ',
+    author: post.author.name,
+    date: formatDate(post.publishedAt || post.createdAt),
+    image: publicUrl(post.coverUrl) || '/images/logo-inline.png',
+    hasCover: Boolean(publicUrl(post.coverUrl)),
+  }))
 
   return (
     <>
-      <section className="pc-band">
-        <div className="pc-band__inner">
-          <h1 className="pc-band__tagline">{SITE.tagline}</h1>
-          <p className="pc-band__intro">
-            আন্তর্জাতিক ইসলামী বিশ্ববিদ্যালয় চট্টগ্রাম-এর একমাত্র সাহিত্য সাময়িকী <img src="/images/logo-inline.png" alt="ত্রৈমাসিক প্রতিচ্ছবি" />
+      {/* ---- Hero + featured carousel ---------------------------------- */}
+      <section className="pcx-hero">
+        <span className="pcx-hero__orb pcx-hero__orb--one" aria-hidden="true" />
+        <span className="pcx-hero__orb pcx-hero__orb--two" aria-hidden="true" />
+        <div className="pc-wrap pcx-hero__intro">
+          <span className="pcx-kicker"><span className="pcx-kicker__dot" aria-hidden="true" />{SITE.name} · সাহিত্য সাময়িকী</span>
+          <h1 className="pcx-hero__title">{SITE.tagline}</h1>
+          <p className="pcx-hero__lead">
+            আন্তর্জাতিক ইসলামী বিশ্ববিদ্যালয় চট্টগ্রাম-এর একমাত্র সাহিত্য সাময়িকী{' '}
+            <img src="/images/logo-inline.png" alt="ত্রৈমাসিক প্রতিচ্ছবি" />
           </p>
+        </div>
+        {(featuredSlides.length > 0 || latestIssue) && (
+          <div className="pc-wrap pcx-hero__stage">
+            {featuredSlides.length > 0
+              ? <FeaturedCarousel slides={featuredSlides} />
+              : <div className="pcx-hero__stagegap" />}
+            {latestIssue && (
+              <aside className="pcx-hardcopy" aria-label="হার্ডকপি সংস্করণ">
+                <span className="pcx-hardcopy__glow" aria-hidden="true" />
+                <div className="pcx-hardcopy__top">
+                  <span className="pcx-hardcopy__badge">হার্ডকপি</span>
+                  <span className="pcx-hardcopy__tag">এখনই অর্ডার করুন</span>
+                </div>
+                {latestIssue.coverUrl && (
+                  <div className="pcx-hardcopy__cover">
+                    <img src={publicUrl(latestIssue.coverUrl)} alt={latestIssue.title} loading="lazy" />
+                  </div>
+                )}
+                <h2 className="pcx-hardcopy__title">{latestIssue.title}</h2>
+                {latestIssue.period && <p className="pcx-hardcopy__period">{latestIssue.period}</p>}
+                <div className="pcx-hardcopy__row">
+                  {latestIssue.price && <span className="pcx-hardcopy__price">{latestIssue.price}</span>}
+                  <span className="pcx-hardcopy__stock">সীমিত কপি</span>
+                </div>
+                <p className="pcx-hardcopy__desc">ছাপা হার্ডকপি হাতে পেতে এখনই অর্ডার করুন।</p>
+                <a className="pcx-hardcopy__btn" href={issueOrderUrl(latestIssue)} target="_blank" rel="noopener">
+                  অর্ডার করুন <Arrow />
+                </a>
+                <div className="pcx-hardcopy__foot">
+                  <Link href={`/issues/${latestIssue.slug}`}>সংখ্যার বিবরণ</Link>
+                  <span>{config.whatsapp_label}</span>
+                </div>
+              </aside>
+            )}
+          </div>
+        )}
+        <div className="pc-wrap pcx-catbar">
+          {categories.slice(0, 8).map((category) => (
+            <Link href={`/category/${category.slug}`} key={category.id}>{category.name}</Link>
+          ))}
+          <Link className="pcx-catbar__all" href="/category/essay">সব বিভাগ <Arrow /></Link>
         </div>
       </section>
 
       <Notice code={one(params.pcp)} />
 
-      {bigFeature && (
-        <section className="pc-wrap pc-section">
-          <SectionHead title="নির্বাচিত প্রবন্ধ" href="/category/essay" linkText="সব প্রবন্ধ" />
-          <div className="pc-featured">
-            <Link className="pc-featured__big" href={`/posts/${bigFeature.slug}`}>
-              <div className="pc-card__img"><PostImage url={bigFeature.coverUrl} alt={bigFeature.title} /></div>
-              <span className="pc-cat">{bigFeature.category?.name}</span>
-              <h3>{bigFeature.title}</h3>
-              <p>{excerpt(bigFeature.content, 32)}</p>
-              <span className="pc-meta">{bigFeature.author.name} · {formatDate(bigFeature.publishedAt || bigFeature.createdAt)}</span>
-            </Link>
-            {sideColumns.map((column, index) => (
-              <div className="pc-featured__sidecol" key={index}>
-                {column.map((post) => <PostCard post={post} key={post.id} />)}
+      {/* ---- Latest + sidebar ------------------------------------------ */}
+      <section className="pc-wrap pcx-section">
+        <div className="pcx-sechead">
+          <div>
+            <span className="pcx-sechead__eyebrow">নতুন প্রকাশ</span>
+            <h2>সর্বশেষ লেখা</h2>
+          </div>
+          <Link className="pcx-sechead__all" href="/search">সব লেখা <Arrow /></Link>
+        </div>
+        <div className="pcx-layout">
+          <div className="pcx-layout__main">
+            {latest.length ? (
+              <div className="pcx-grid">
+                {latest.map((post) => <StoryCard post={post} key={post.id} />)}
               </div>
-            ))}
+            ) : <div className="pc-empty">এখনো কোনো লেখা প্রকাশিত হয়নি।</div>}
           </div>
-        </section>
-      )}
-
-      <section className="pc-wrap pc-section">
-        <div className="pc-twocol">
-          <div className="pc-twocol__main">
-            <div className="pc-headline"><h2>সর্বশেষ লেখা</h2><Link href="/search">সব লেখা</Link></div>
-            {latest.length ? latest.map((post) => <PostRow post={post} key={post.id} />) : <div className="pc-empty">এখনো কোনো লেখা প্রকাশিত হয়নি।</div>}
-          </div>
-          <aside className="pc-twocol__side">
-            <div className="pc-popular">
-              <div className="pc-headline"><h2>জনপ্রিয় লেখা</h2></div>
+          <aside className="pcx-layout__side">
+            <div className="pcx-panel">
+              <div className="pcx-panel__head"><h3>জনপ্রিয় লেখা</h3></div>
               {popular.map((post, index) => (
-                <Link href={`/posts/${post.slug}`} key={post.id}>
-                  <b>{bn(index + 1)}</b>
-                  <div><h3>{post.title}</h3><span className="pc-meta">{post.author.name}</span></div>
+                <Link className="pcx-rank" href={`/posts/${post.slug}`} key={post.id}>
+                  <span className="pcx-rank__num">{bn(index + 1)}</span>
+                  <span className="pcx-rank__body">
+                    <b>{post.title}</b>
+                    <span className="pc-meta">{post.author.name}</span>
+                  </span>
                 </Link>
               ))}
             </div>
-            <div>
-              <div className="pc-headline"><h2>বিভাগ</h2></div>
-              <div className="pc-tags">
+            <div className="pcx-panel">
+              <div className="pcx-panel__head"><h3>বিভাগ</h3></div>
+              <div className="pcx-tags">
                 {categories.map((category) => (
                   <Link href={`/category/${category.slug}`} key={category.id}>{category.name}</Link>
                 ))}
               </div>
             </div>
-            <div className="pc-sidecta">
-              <h2>আপনার লেখা পাঠান</h2>
+            <div className="pcx-submitcard">
+              <span className="pcx-submitcard__icon" aria-hidden="true">✎</span>
+              <h3>আপনার লেখা পাঠান</h3>
               <p>মৌলিক বাংলা লেখা, .docx ফরম্যাটে, ১৫০০-৩০০০ শব্দের মধ্যে।</p>
-              <div><Link className="pc-btn pc-btn--white" href="/submit">লেখা জমা দিন</Link></div>
+              <Link className="pc-btn pc-btn--white" href="/submit">লেখা জমা দিন</Link>
             </div>
           </aside>
         </div>
       </section>
 
+      {/* ---- Latest issue ----------------------------------------------- */}
       {latestIssue && (
-        <section className="pc-issueband">
-          <div className="pc-issue">
-            {latestIssue.coverUrl && (
-              <div className="pc-issue__cover">
-                <img src={publicUrl(latestIssue.coverUrl)} alt={latestIssue.title} />
-              </div>
-            )}
-            <div className="pc-issue__info">
-              <span className="pc-label">সর্বশেষ সংখ্যা</span>
+        <section className="pcx-issueband">
+          <div className="pcx-issue">
+            <div className="pcx-issue__art">
+              {latestIssue.coverUrl && (
+                <img src={publicUrl(latestIssue.coverUrl)} alt={latestIssue.title} loading="lazy" />
+              )}
+              <span className="pcx-issue__badge">সর্বশেষ সংখ্যা</span>
+            </div>
+            <div className="pcx-issue__body">
+              <span className="pc-label--light">নতুন প্রকাশ</span>
               <h2>{latestIssue.title}</h2>
-              {latestIssue.period && <p style={{ fontSize: 17, color: '#fff' }}>{latestIssue.period}</p>}
+              {latestIssue.period && <p className="pcx-issue__period">{latestIssue.period}</p>}
               <p>ছাপা হার্ডকপি{latestIssue.price ? `। মূল্য: ${latestIssue.price}` : ''}</p>
               <div className="pc-actions" style={{ marginTop: 6 }}>
                 <a className="pc-btn pc-btn--white" href={issueOrderUrl(latestIssue)} target="_blank" rel="noopener">হার্ডকপি অর্ডার করুন</a>
                 <Link className="pc-btn pc-btn--line" href="/issues">সব সংখ্যা</Link>
               </div>
               {issuePosts.length > 0 && (
-                <div className="pc-toc">
+                <div className="pcx-toc">
                   <h3>এই সংখ্যার লেখা</h3>
                   {issuePosts.map((post) => (
                     <Link href={`/posts/${post.slug}`} key={post.id}>
@@ -152,39 +217,50 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
         </section>
       )}
 
+      {/* ---- Poetry + short stories ------------------------------------- */}
       {(poetry.length > 0 || stories.length > 0) && (
         <section className="pc-sand">
-          <div className="pc-wrap">
-            <div className="pc-spot">
-              <div className="pc-sechead" style={{ margin: 0 }}><h2 className="pc-h2">কবিতা</h2><Link href="/category/poetry">সব কবিতা</Link></div>
-              {poetry.map((post) => (
-                <Link className="pc-poem" href={`/posts/${post.slug}`} key={post.id}>
-                  <h3>{post.title}</h3>
-                  <p>{excerpt(post.content, 28)}</p>
-                  <span className="pc-meta">{post.author.name}</span>
-                </Link>
-              ))}
-            </div>
-            <div className="pc-spot">
-              <div className="pc-sechead" style={{ margin: 0 }}><h2 className="pc-h2">ছোটগল্প</h2><Link href="/category/short-story">সব গল্প</Link></div>
-              {stories.map((post) => (
-                <Link className="pc-mini" href={`/posts/${post.slug}`} key={post.id}>
-                  <div className="pc-mini__img"><PostImage url={post.coverUrl} alt={post.title} /></div>
-                  <div>
+          <div className="pc-wrap pcx-spots">
+            {poetry.length > 0 && (
+              <div className="pc-spot">
+                <SectionHead title="কবিতা" href="/category/poetry" linkText="সব কবিতা" />
+                {poetry.map((post) => (
+                  <Link className="pc-poem" href={`/posts/${post.slug}`} key={post.id}>
                     <h3>{post.title}</h3>
-                    <p>{excerpt(post.content, 14)}</p>
+                    <p>{excerpt(post.content, 28)}</p>
                     <span className="pc-meta">{post.author.name}</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+            {stories.length > 0 && (
+              <div className="pc-spot">
+                <SectionHead title="ছোটগল্প" href="/category/short-story" linkText="সব গল্প" />
+                {stories.map((post) => (
+                  <Link className="pc-mini" href={`/posts/${post.slug}`} key={post.id}>
+                    <div className="pc-mini__img"><PostImage url={post.coverUrl} alt={post.title} /></div>
+                    <div>
+                      <h3>{post.title}</h3>
+                      <p>{excerpt(post.content, 14)}</p>
+                      <span className="pc-meta">{post.author.name}</span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       )}
 
+      {/* ---- Gallery ----------------------------------------------------- */}
       {activities.length > 0 && (
-        <section className="pc-wrap pc-section" style={{ paddingTop: 52 }}>
-          <h2 className="pc-h2" style={{ marginBottom: 6 }}>আমাদের কার্যক্রম</h2>
+        <section className="pc-wrap pcx-section">
+          <div className="pcx-sechead">
+            <div>
+              <span className="pcx-sechead__eyebrow">পাঠপ্রাঙ্গন</span>
+              <h2>আমাদের কার্যক্রম</h2>
+            </div>
+          </div>
           <p className="pc-lead">পাঠপ্রাঙ্গনের বিভিন্ন আয়োজন ও অনুষ্ঠানের ছবি।</p>
           <div className="pc-gallery">
             {activities.map((activity) => (
@@ -199,15 +275,24 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
         </section>
       )}
 
+      {/* ---- Writers ------------------------------------------------------ */}
       {topAuthors.length > 0 && (
-        <section className="pc-wrap pc-section" style={{ paddingTop: 52 }}>
-          <SectionHead title="আমাদের লেখক" href="/authors" linkText="সব লেখক" />
+        <section className="pc-wrap pcx-section">
+          <div className="pcx-sechead">
+            <div>
+              <span className="pcx-sechead__eyebrow">কলমের অধিপতি</span>
+              <h2>আমাদের লেখক</h2>
+            </div>
+            <Link className="pcx-sechead__all" href="/authors">সব লেখক <Arrow /></Link>
+          </div>
           <div className="pc-strip">
             {topAuthors.map((author) => (
               <Link className="pc-person" href={`/author/${author.id}`} key={author.id}>
-                {author.avatarUrl
-                  ? <img src={publicUrl(author.avatarUrl)} alt="" style={{ width: 92, height: 92 }} />
-                  : <span className="pc-noimg" style={{ width: 92, height: 92, borderRadius: '50%' }} />}
+                <span className="pc-person__avatar">
+                  {author.avatarUrl
+                    ? <img src={publicUrl(author.avatarUrl)} alt="" loading="lazy" />
+                    : <span className="pc-noimg" />}
+                </span>
                 <h3>{author.name}</h3>
                 <span className="pc-meta">{bn(author._count.posts)}টি লেখা</span>
               </Link>
@@ -216,8 +301,14 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
         </section>
       )}
 
-      <section className="pc-wrap pc-section" style={{ paddingTop: 52 }}>
-        <SectionHead title="বিভাগসমূহ" />
+      {/* ---- Categories --------------------------------------------------- */}
+      <section className="pc-wrap pcx-section">
+        <div className="pcx-sechead">
+          <div>
+            <span className="pcx-sechead__eyebrow">বিষয়ভিত্তিক সংগ্রহ</span>
+            <h2>বিভাগসমূহ</h2>
+          </div>
+        </div>
         <div className="pc-catgrid">
           {categories.map((category, index) => (
             <div className="pc-catcard" key={category.id}>
@@ -236,6 +327,7 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
         </div>
       </section>
 
+      {/* ---- Join / submit ------------------------------------------------ */}
       <section className="pc-wrap pc-ctas">
         <div className="pc-cta">
           <h2>পাঠক হিসেবে যুক্ত হোন</h2>

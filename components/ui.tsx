@@ -49,6 +49,26 @@ export function PostCard({ post }: { post: PublicPost }) {
   )
 }
 
+/** Modern editorial card used on the home page and archive grids. */
+export function StoryCard({ post }: { post: PublicPost }) {
+  return (
+    <Link className="pc-story" href={`/posts/${post.slug}`}>
+      <div className="pc-story__img"><PostImage url={post.coverUrl} alt={post.title} /></div>
+      <div className="pc-story__body">
+        <span className="pc-cat">{post.category?.name}</span>
+        <h3 className="pc-story__title">{post.title}</h3>
+        <p className="pc-story__excerpt">{excerpt(post.content, 22)}</p>
+        <span className="pc-story__foot">
+          <span className="pc-meta">{post.author.name} · {formatDate(post.publishedAt || post.createdAt)}</span>
+          <span className="pc-story__go" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
+          </span>
+        </span>
+      </div>
+    </Link>
+  )
+}
+
 export function PostRow({ post }: { post: PublicPost }) {
   return (
     <Link className="pc-row" href={`/posts/${post.slug}`}>
