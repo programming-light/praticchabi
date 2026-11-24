@@ -777,7 +777,7 @@ body.pc:not(:has(.admin-shell)) .pcx-formpage { padding-top: 44px; padding-botto
 body.pc:not(:has(.admin-shell)) .pcx-formcard {
   max-width: 760px; margin: 0 auto; text-align: center;
   background: #fff; border: 1px solid rgba(8, 48, 29, .07);
-  border-radius: var(--pc-r-lg); padding: 38px; box-shadow: var(--pc-shadow);
+  border-radius: var(--pc-r-lg); padding: 20px; box-shadow: var(--pc-shadow);
 }
 .pcx-formcard__eyebrow {
   display: inline-block; font-size: 12px; font-weight: 700;
@@ -793,7 +793,7 @@ body.pc:not(:has(.admin-shell)) .pcx-formcard {
 /* Contact page: form on the left, contact details on the right. */
 body.pc:not(:has(.admin-shell)) .pcx-contactpage {
   display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(300px, .65fr);
-  gap: 24px; align-items: start; padding-top: 44px; padding-bottom: 72px;
+  gap: 10px; align-items: start; padding-top: 44px; padding-bottom: 72px;
 }
 .pcx-contactpage .pcx-formcard { max-width: none; margin: 0; }
 .pcx-contactpage__info {
