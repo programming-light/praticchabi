@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { currentUser, isEditor } from '@/lib/auth'
 import { getCategories } from '@/lib/queries'
 import LogoutButton from './forms/LogoutButton'
+import MobileNav from './MobileNav'
 
 export default async function SiteHeader() {
   const [categories, user] = await Promise.all([getCategories(), currentUser()])
@@ -53,6 +54,14 @@ export default async function SiteHeader() {
             )}
           </div>
         </nav>
+        <div className="pc-wrap pc-mobilebar">
+          <MobileNav
+            categories={categories.map(({ id, slug, name }) => ({ id, slug, name }))}
+            signedIn={Boolean(user)}
+            canAdmin={isEditor(user?.role)}
+            displayName={user?.name || ''}
+          />
+        </div>
       </div>
       <div id="content" />
     </>
